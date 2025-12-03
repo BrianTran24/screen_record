@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Screen Record Plus Demo'),
     );
   }
 }
@@ -42,11 +42,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   RecordStatus status = RecordStatus.none;
+  bool useNativeRecording = false;
+  bool isNativeSupported = false;
 
   ScreenRecorderController controller = ScreenRecorderController(
     binding: WidgetsFlutterBinding.ensureInitialized(),
     skipFramesBetweenCaptures: 0,
     pixelRatio: 3,
+    recordingMode: RecordingMode.widget,
   );
 
   bool get canExport => controller.exporter.hasFrames;
@@ -59,6 +62,25 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _checkNativeSupport();
+  }
+
+  Future<void> _checkNativeSupport() async {
+    final supported = await NativeScreenRecorder.isSupported();
+    setState(() {
+      isNativeSupported = supported;
+    });
+  }
+
+  void _updateRecordingMode() {
+    controller = ScreenRecorderController(
+      binding: WidgetsFlutterBinding.ensureInitialized(),
+      skipFramesBetweenCaptures: 0,
+      pixelRatio: 3,
+      recordingMode: useNativeRecording ? RecordingMode.native : RecordingMode.widget,
+      // Example: Record a specific region (200x200 starting at 100,100)
+      recordingRect: useNativeRecording ? const Rect.fromLTWH(100, 100, 200, 200) : null,
+    );
   }
 
   @override
@@ -72,8 +94,38 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              if (isNativeSupported)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Native Recording:'),
+                      Switch(
+                        value: useNativeRecording,
+                        onChanged: status == RecordStatus.none
+                            ? (value) {
+                                setState(() {
+                                  useNativeRecording = value;
+                                  _updateRecordingMode();
+                                });
+                              }
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              if (useNativeRecording && status == RecordStatus.none)
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Native mode will record a 200x200 region\nstarting at position (100, 100)',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
               ScreenRecorder(
-                height: MediaQuery.of(context).size.height - 300,
+                height: MediaQuery.of(context).size.height - 400,
                 width: MediaQuery.of(context).size.width,
                 controller: controller,
                 child: const UnconstrainedBox(
@@ -84,6 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
               if (status == RecordStatus.none)
                 ElevatedButton(
                   onPressed: () async {
@@ -92,7 +145,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       status = RecordStatus.recording;
                     });
                   },
-                  child: const Text('Start Recording'),
+                  child: Text(
+                    useNativeRecording ? 'Start Native Recording' : 'Start Widget Recording',
+                  ),
                 ),
               if (status == RecordStatus.recording)
                 ElevatedButton(

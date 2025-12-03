@@ -10,14 +10,26 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../screen_record_plus.dart';
+import 'native_screen_recorder.dart';
 
 Size globalSize = const Size(0, 0);
+
+/// Recording mode for the screen recorder
+enum RecordingMode {
+  /// Use Flutter's RepaintBoundary to capture frames
+  widget,
+  
+  /// Use native platform APIs for screen recording
+  native,
+}
 
 class ScreenRecorderController {
   ScreenRecorderController({
     Exporter? exporter,
     this.pixelRatio = 0.5,
     this.skipFramesBetweenCaptures = 2,
+    this.recordingMode = RecordingMode.widget,
+    this.recordingRect,
     SchedulerBinding? binding,
   })  : _containerKey = GlobalKey(),
         _binding = binding ?? SchedulerBinding.instance;
@@ -26,6 +38,13 @@ class ScreenRecorderController {
   final SchedulerBinding _binding;
 
   Exporter get exporter => Exporter(skipFramesBetweenCaptures, this);
+
+  /// The recording mode (widget-based or native)
+  final RecordingMode recordingMode;
+
+  /// Optional recording area coordinates (for native recording)
+  /// If null, records the entire screen/widget
+  final Rect? recordingRect;
 
   /// The pixelRatio describes the scale between the logical pixels and the size
   /// of the output image. Specifying 1.0 will give you a 1:1 mapping between
@@ -88,6 +107,24 @@ class ScreenRecorderController {
     }
     _record = true;
 
+    // Use native recording if mode is native
+    if (recordingMode == RecordingMode.native) {
+      final success = await NativeScreenRecorder.startRecording(
+        x: recordingRect?.left,
+        y: recordingRect?.top,
+        width: recordingRect?.width,
+        height: recordingRect?.height,
+      );
+      if (!success) {
+        debugPrint('Failed to start native recording');
+        _record = false;
+        return;
+      }
+      startTime = DateTime.now();
+      return;
+    }
+
+    // Widget-based recording
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path;
     Directory renderingDir = Directory(join(path, 'rendering'));
@@ -103,6 +140,11 @@ class ScreenRecorderController {
   void stop() {
     _record = false;
     endTime = DateTime.now();
+    
+    // Stop native recording if in native mode
+    if (recordingMode == RecordingMode.native) {
+      NativeScreenRecorder.stopRecording();
+    }
   }
 
   void postFrameCallback(Duration timestamp) {

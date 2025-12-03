@@ -4,9 +4,12 @@ import 'dart:ui' as ui show ImageByteFormat, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as image;
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../screen_record_plus.dart';
 import 'create_video.dart';
+import 'native_screen_recorder.dart';
 
 class Exporter {
   Exporter(this.skipFramesBetweenCaptures, this.controller);
@@ -55,6 +58,17 @@ class Exporter {
     if (duration == null) {
       throw Exception('Duration is null');
     }
+    
+    // Handle native recording export
+    if (controller.recordingMode == RecordingMode.native) {
+      return await _exportNativeRecording(
+        onProgress: onProgress,
+        multiCache: multiCache,
+        cacheFolder: cacheFolder,
+      );
+    }
+    
+    // Handle widget-based recording export
     File? result = await createVideoFromImages(
       duration: duration!,
       onProgress: onProgress,
@@ -64,6 +78,50 @@ class Exporter {
     );
     clearRenderingDirectory();
     return result;
+  }
+
+  /// Export native recording to video file
+  Future<File?> _exportNativeRecording({
+    ValueChanged<ExportResult>? onProgress,
+    bool multiCache = false,
+    String cacheFolder = "ScreenRecordVideos",
+  }) async {
+    try {
+      onProgress?.call(ExportResult(status: ExportStatus.exporting, percent: 0.5));
+      
+      String cacheDir = (await getApplicationDocumentsDirectory()).path;
+      String outputName = DateTime.now().millisecondsSinceEpoch.toString();
+      
+      if (multiCache == false) {
+        outputName = "ScreenRecord";
+      }
+      
+      final Directory cacheFolderDir = Directory(join(cacheDir, cacheFolder));
+      if (!cacheFolderDir.existsSync()) {
+        cacheFolderDir.createSync();
+      }
+      
+      final outputPath = join(cacheFolderDir.path, '$outputName.mp4');
+      
+      final result = await NativeScreenRecorder.exportVideo(outputPath: outputPath);
+      
+      if (result != null) {
+        final file = File(result);
+        onProgress?.call(ExportResult(
+          status: ExportStatus.exported,
+          file: file,
+          percent: 1.0,
+        ));
+        return file;
+      }
+      
+      onProgress?.call(ExportResult(status: ExportStatus.failed, percent: 0));
+      return null;
+    } catch (e) {
+      debugPrint('Error exporting native recording: $e');
+      onProgress?.call(ExportResult(status: ExportStatus.failed, percent: 0));
+      return null;
+    }
   }
 
   static image.PaletteUint8 _convertPalette(image.Palette palette) {
