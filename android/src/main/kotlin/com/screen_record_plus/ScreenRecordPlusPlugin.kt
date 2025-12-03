@@ -47,6 +47,8 @@ class ScreenRecordPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     companion object {
         private const val TAG = "ScreenRecordPlus"
         private const val SCREEN_RECORD_REQUEST_CODE = 1001
+        private const val MIN_API_LEVEL_LOLLIPOP = Build.VERSION_CODES.LOLLIPOP
+        private const val MIN_API_LEVEL_S = Build.VERSION_CODES.S
     }
     
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -97,7 +99,7 @@ class ScreenRecordPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 exportVideo(outputPath, result)
             }
             "isSupported" -> {
-                result.success(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                result.success(Build.VERSION.SDK_INT >= MIN_API_LEVEL_LOLLIPOP)
             }
             "isRecording" -> {
                 result.success(isRecording)
@@ -175,7 +177,7 @@ class ScreenRecordPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         val outputFile = File.createTempFile("screen_record_", ".mp4", outputDir)
         videoOutputPath = outputFile.absolutePath
         
-        mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        mediaRecorder = if (Build.VERSION.SDK_INT >= MIN_API_LEVEL_S) {
             MediaRecorder(ctx)
         } else {
             @Suppress("DEPRECATION")

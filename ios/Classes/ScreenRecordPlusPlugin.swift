@@ -77,8 +77,8 @@ public class ScreenRecordPlusPlugin: NSObject, FlutterPlugin, RPPreviewViewContr
         recordingY = CGFloat(y)
         
         let screenSize = UIScreen.main.bounds.size
-        recordingWidth = width != nil ? CGFloat(width!) : screenSize.width
-        recordingHeight = height != nil ? CGFloat(height!) : screenSize.height
+        recordingWidth = CGFloat(width ?? Double(screenSize.width))
+        recordingHeight = CGFloat(height ?? Double(screenSize.height))
         
         // Setup video writer
         setupVideoWriter()

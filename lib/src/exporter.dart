@@ -92,7 +92,7 @@ class Exporter {
       String cacheDir = (await getApplicationDocumentsDirectory()).path;
       String outputName = DateTime.now().millisecondsSinceEpoch.toString();
       
-      if (multiCache == false) {
+      if (!multiCache) {
         outputName = "ScreenRecord";
       }
       

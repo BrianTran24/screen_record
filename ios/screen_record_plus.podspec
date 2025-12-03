@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'screen_record_plus'
-  s.version          = '0.0.4'
+  s.version          = '0.0.5'
   s.summary          = 'Screen recording plugin with native API support'
   s.description      = <<-DESC
 A Flutter plugin for screen recording using native APIs with coordinate-based recording support.

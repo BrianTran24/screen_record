@@ -137,13 +137,13 @@ class ScreenRecorderController {
     _binding.addPostFrameCallback(postFrameCallback);
   }
 
-  void stop() {
+  void stop() async {
     _record = false;
     endTime = DateTime.now();
     
     // Stop native recording if in native mode
     if (recordingMode == RecordingMode.native) {
-      NativeScreenRecorder.stopRecording();
+      await NativeScreenRecorder.stopRecording();
     }
   }
 
