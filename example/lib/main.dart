@@ -3,14 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:screen_record_plus/screen_record_plus.dart';
 
-import 'sample_animation.dart';
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // FFmpegKitConfig.enableLogCallback((log) {
-  //   final message = log.getMessage();
-  //   print(message);
-  // });
   runApp(const MyApp());
 }
 
@@ -20,11 +14,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Screen Record Plus Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Screen Record Plus Demo'),
+      home: const MyHomePage(title: 'Native Screen Recording Demo'),
     );
   }
 }
@@ -42,22 +36,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   RecordStatus status = RecordStatus.none;
-  bool useNativeRecording = false;
   bool isNativeSupported = false;
+  File? exportedFile;
 
   ScreenRecorderController controller = ScreenRecorderController(
-    binding: WidgetsFlutterBinding.ensureInitialized(),
-    skipFramesBetweenCaptures: 0,
-    pixelRatio: 3,
-    recordingMode: RecordingMode.widget,
+    // Example: Record a specific region (400x400 starting at 100,100)
+    recordingRect: const Rect.fromLTWH(100, 100, 400, 400),
   );
-
-  bool get canExport => controller.exporter.hasFrames;
-  double percentExport = 0;
-
-  Duration duration = const Duration(seconds: 3);
-
-  File? testFile;
 
   @override
   void initState() {
@@ -72,17 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _updateRecordingMode() {
-    controller = ScreenRecorderController(
-      binding: WidgetsFlutterBinding.ensureInitialized(),
-      skipFramesBetweenCaptures: 0,
-      pixelRatio: 3,
-      recordingMode: useNativeRecording ? RecordingMode.native : RecordingMode.widget,
-      // Example: Record a specific region (200x200 starting at 100,100)
-      recordingRect: useNativeRecording ? const Rect.fromLTWH(100, 100, 200, 200) : null,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,90 +68,191 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              if (isNativeSupported)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Native Recording:'),
-                      Switch(
-                        value: useNativeRecording,
-                        onChanged: status == RecordStatus.none
-                            ? (value) {
-                                setState(() {
-                                  useNativeRecording = value;
-                                  _updateRecordingMode();
-                                });
-                              }
-                            : null,
+              if (!isNativeSupported)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'Native screen recording is not supported on this platform',
+                    style: TextStyle(color: Colors.red, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              if (isNativeSupported) ...[
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'Recording a 400x400 region starting at (100, 100)',
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  width: 400,
+                  height: 400,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          status == RecordStatus.recording
+                              ? Icons.fiber_manual_record
+                              : Icons.videocam,
+                          size: 80,
+                          color: status == RecordStatus.recording
+                              ? Colors.red
+                              : Colors.grey,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          status == RecordStatus.recording
+                              ? 'Recording...'
+                              : 'Ready to record',
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                if (status == RecordStatus.none)
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await controller.start();
+                      setState(() {
+                        status = RecordStatus.recording;
+                      });
+                    },
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Start Recording'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
                       ),
+                    ),
+                  ),
+                if (status == RecordStatus.recording)
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await controller.stop();
+                      setState(() {
+                        status = RecordStatus.stop;
+                      });
+                    },
+                    icon: const Icon(Icons.stop),
+                    label: const Text('Stop Recording'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                    ),
+                  ),
+                if (status == RecordStatus.stop)
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      setState(() {
+                        status = RecordStatus.exporting;
+                      });
+                      final file = await controller.exporter.exportVideo(
+                        multiCache: true,
+                        cacheFolder: "recordings",
+                        onProgress: (result) {
+                          debugPrint('Export: ${result.status} - ${result.percent}');
+                        },
+                      );
+                      setState(() {
+                        exportedFile = file;
+                        status = RecordStatus.none;
+                      });
+                      if (file != null && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Video exported to: ${file.path}'),
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.download),
+                    label: const Text('Export Video'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                    ),
+                  ),
+                if (status == RecordStatus.exporting)
+                  const Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Exporting video...'),
                     ],
                   ),
-                ),
-              if (useNativeRecording && status == RecordStatus.none)
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'Native mode will record a 200x200 region\nstarting at position (100, 100)',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: status == RecordStatus.none
+                      ? () async {
+                          await controller.clearCacheFolder("recordings");
+                          setState(() {
+                            exportedFile = null;
+                          });
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Cache cleared'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        }
+                      : null,
+                  icon: const Icon(Icons.delete),
+                  label: const Text('Clear Cache'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                   ),
                 ),
-              ScreenRecorder(
-                height: MediaQuery.of(context).size.height - 400,
-                width: MediaQuery.of(context).size.width,
-                controller: controller,
-                child: const UnconstrainedBox(
-                  child: SizedBox(
-                    height: 300,
-                    width: 300,
-                    child: SampleAnimation(),
+                if (exportedFile != null) ...[
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.green),
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.green, size: 48),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Last export:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          exportedFile!.path.split('/').last,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              if (status == RecordStatus.none)
-                ElevatedButton(
-                  onPressed: () async {
-                    await controller.start();
-                    setState(() {
-                      status = RecordStatus.recording;
-                    });
-                  },
-                  child: Text(
-                    useNativeRecording ? 'Start Native Recording' : 'Start Widget Recording',
-                  ),
-                ),
-              if (status == RecordStatus.recording)
-                ElevatedButton(
-                  onPressed: () async {
-                    controller.stop();
-                    setState(() {
-                      status = RecordStatus.stop;
-                    });
-                  },
-                  child: const Text('Stop Recording'),
-                ),
-              if (status == RecordStatus.stop)
-                ElevatedButton(
-                  onPressed: () async {
-                    await controller.exporter.exportVideo(multiCache: false, cacheFolder: "test2").then((val) {
-                      debugPrint('File Exported: $val');
-                    });
-
-                    setState(() {
-                      status = RecordStatus.none;
-                    });
-                  },
-                  child: const Text('Export'),
-                ),
-              ElevatedButton(
-                onPressed: () async {
-                  controller.clearCacheFolder("test2");
-                },
-                child: const Text('Clear Cache Folder'),
-              )
+                ],
+              ],
             ],
           ),
         ),

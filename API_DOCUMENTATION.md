@@ -1,46 +1,35 @@
-# API Documentation - Screen Record Plus
+# API Documentation - Screen Record Plus v1.0.0
+
+Native screen recording library using platform-specific APIs.
 
 ## Table of Contents
 - [ScreenRecorderController](#screenrecordercontroller)
 - [NativeScreenRecorder](#nativescreenrecorder)
-- [ScreenRecorder Widget](#screenrecorder-widget)
 - [Exporter](#exporter)
-- [Enums](#enums)
 - [Data Classes](#data-classes)
 
 ---
 
 ## ScreenRecorderController
 
-Main controller for managing screen recording operations.
+Main controller for managing native screen recording operations.
 
 ### Constructor
 
 ```dart
 ScreenRecorderController({
-  double pixelRatio = 0.5,
-  int skipFramesBetweenCaptures = 2,
-  RecordingMode recordingMode = RecordingMode.widget,
   Rect? recordingRect,
-  SchedulerBinding? binding,
 })
 ```
 
 #### Parameters
-- `pixelRatio` (double): Scale between logical pixels and output image size. Default: 0.5
-- `skipFramesBetweenCaptures` (int): Number of frames to skip between captures. Default: 2
-- `recordingMode` (RecordingMode): Recording mode (widget or native). Default: RecordingMode.widget
-- `recordingRect` (Rect?): Recording area for native mode. If null, records entire screen
-- `binding` (SchedulerBinding?): Custom scheduler binding. Default: SchedulerBinding.instance
+- `recordingRect` (Rect?): Optional recording area. If null, records the entire screen
 
 ### Properties
 
 - `exporter` (Exporter): Get the exporter instance for this controller
 - `duration` (Duration?): Get the duration of the recording
-- `pixelRatio` (double): The pixel ratio for recording
-- `skipFramesBetweenCaptures` (int): Frame skip count
-- `recordingMode` (RecordingMode): Current recording mode
-- `recordingRect` (Rect?): Recording region (native mode only)
+- `recordingRect` (Rect?): The recording region coordinates
 
 ### Methods
 
@@ -48,12 +37,17 @@ ScreenRecorderController({
 ```dart
 Future<void> start()
 ```
-Starts the recording. Initializes appropriate recording mechanism based on mode.
+Starts native screen recording.
 
 **Returns:** Future<void>
 
+**Throws:** May throw if recording fails to start
+
 **Example:**
 ```dart
+final controller = ScreenRecorderController(
+  recordingRect: Rect.fromLTWH(0, 0, 400, 400),
+);
 await controller.start();
 ```
 
@@ -122,8 +116,8 @@ final success = await NativeScreenRecorder.startRecording();
 final success = await NativeScreenRecorder.startRecording(
   x: 100,
   y: 100,
-  width: 200,
-  height: 200,
+  width: 400,
+  height: 400,
 );
 ```
 
@@ -166,7 +160,7 @@ static Future<bool> isSupported()
 ```
 Checks if native screen recording is supported on this platform.
 
-**Returns:** Future<bool> - true if supported
+**Returns:** Future<bool> - true if supported (Android 21+ or iOS 11.0+)
 
 **Example:**
 ```dart
@@ -191,47 +185,17 @@ final recording = await NativeScreenRecorder.isRecording();
 
 ---
 
-## ScreenRecorder Widget
+## Exporter
 
-Widget that wraps content for recording.
+Handles video export operations.
 
 ### Constructor
 
 ```dart
-const ScreenRecorder({
-  Key? key,
-  required Widget child,
-  required ScreenRecorderController controller,
-  required double width,
-  required double height,
-  Color background = Colors.transparent,
-})
+Exporter(ScreenRecorderController controller)
 ```
 
-#### Parameters
-- `child` (Widget): The widget to record
-- `controller` (ScreenRecorderController): Controller for recording operations
-- `width` (double): Width of the recording area
-- `height` (double): Height of the recording area
-- `background` (Color): Background color. Default: Colors.transparent
-
-### Example
-
-```dart
-ScreenRecorder(
-  controller: controller,
-  width: 300,
-  height: 300,
-  background: Colors.white,
-  child: MyAnimatedWidget(),
-)
-```
-
----
-
-## Exporter
-
-Handles video export operations.
+Created automatically via `controller.exporter`.
 
 ### Methods
 
@@ -239,7 +203,6 @@ Handles video export operations.
 ```dart
 Future<File?> exportVideo({
   ValueChanged<ExportResult>? onProgress,
-  double speed = 1,
   bool multiCache = false,
   String cacheFolder = "ScreenRecordVideos",
 })
@@ -248,7 +211,6 @@ Exports the recorded content as a video file.
 
 **Parameters:**
 - `onProgress` (ValueChanged<ExportResult>?): Progress callback
-- `speed` (double): Video playback speed. Default: 1.0
 - `multiCache` (bool): Create unique filename for each export. Default: false
 - `cacheFolder` (String): Folder for cached videos. Default: "ScreenRecordVideos"
 
@@ -260,32 +222,14 @@ final file = await controller.exporter.exportVideo(
   multiCache: true,
   cacheFolder: "my_videos",
   onProgress: (result) {
-    print('Progress: ${result.percent}');
+    print('Progress: ${result.status} - ${result.percent}');
   },
 );
 ```
 
 ---
 
-## Enums
-
-### RecordingMode
-
-Defines the recording mode.
-
-```dart
-enum RecordingMode {
-  widget,  // Use Flutter's RepaintBoundary
-  native,  // Use native platform APIs
-}
-```
-
-**Example:**
-```dart
-final controller = ScreenRecorderController(
-  recordingMode: RecordingMode.native,
-);
-```
+## Data Classes
 
 ### ExportStatus
 
@@ -300,10 +244,6 @@ enum ExportStatus {
   failed,     // Export failed
 }
 ```
-
----
-
-## Data Classes
 
 ### ExportResult
 
@@ -332,19 +272,6 @@ ExportResult(
 )
 ```
 
-### Frame
-
-Represents a captured frame.
-
-#### Properties
-- `timeStamp` (Duration): Time when frame was captured
-- `image` (ui.Image): The captured image
-
-#### Constructor
-```dart
-Frame(Duration timeStamp, ui.Image image)
-```
-
 ---
 
 ## Complete Usage Example
@@ -368,12 +295,12 @@ class _RecordingExampleState extends State<RecordingExample> {
     
     // Check native support
     NativeScreenRecorder.isSupported().then((supported) {
-      // Initialize controller
-      controller = ScreenRecorderController(
-        recordingMode: supported ? RecordingMode.native : RecordingMode.widget,
-        recordingRect: supported ? Rect.fromLTWH(0, 0, 400, 400) : null,
-        pixelRatio: 3.0,
-      );
+      if (supported) {
+        // Initialize controller
+        controller = ScreenRecorderController(
+          recordingRect: Rect.fromLTWH(0, 0, 400, 400),
+        );
+      }
     });
   }
 
@@ -401,12 +328,6 @@ class _RecordingExampleState extends State<RecordingExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ScreenRecorder(
-        controller: controller,
-        width: 400,
-        height: 400,
-        child: MyContent(),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: isRecording ? stopAndExport : startRecording,
         child: Icon(isRecording ? Icons.stop : Icons.play_arrow),
@@ -421,16 +342,19 @@ class _RecordingExampleState extends State<RecordingExample> {
 ### Android
 - Requires user permission for screen recording
 - Permission dialog appears on first recording attempt
-- Minimum API level: 21 (Android 5.0)
+- Minimum API level: 21 (Android 5.0 Lollipop)
+- Uses MediaProjection + MediaRecorder
+- Output: MP4 with H.264 encoding at 30fps, 5 Mbps
 
 ### iOS
 - Requires `NSMicrophoneUsageDescription` in Info.plist
 - Works on iOS 11.0 and later
-- User must grant recording permission
+- Uses ReplayKit (RPScreenRecorder)
+- Output: MP4 with H.264 encoding
 
 ## Best Practices
 
-1. **Always check native support** before using native recording:
+1. **Always check native support** before using:
    ```dart
    final supported = await NativeScreenRecorder.isSupported();
    ```
@@ -456,4 +380,12 @@ class _RecordingExampleState extends State<RecordingExample> {
        // Update UI with progress
      },
    );
+   ```
+
+5. **Use coordinate recording for specific regions**:
+   ```dart
+   // Record only a specific area
+   ScreenRecorderController(
+     recordingRect: Rect.fromLTWH(100, 100, 400, 400),
+   )
    ```

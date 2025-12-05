@@ -33,9 +33,6 @@ class _NativeRecordingExampleState extends State<NativeRecordingExample> {
 
   void _initializeController() {
     _controller = ScreenRecorderController(
-      recordingMode: RecordingMode.native,
-      pixelRatio: 3.0,
-      skipFramesBetweenCaptures: 0,
       // Record a 400x400 region starting at position (50, 100)
       recordingRect: const Rect.fromLTWH(50, 100, 400, 400),
     );
@@ -49,7 +46,7 @@ class _NativeRecordingExampleState extends State<NativeRecordingExample> {
   }
 
   Future<void> _stopRecording() async {
-    _controller.stop();
+    await _controller.stop();
     setState(() {
       _isRecording = false;
     });
