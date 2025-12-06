@@ -1,6 +1,6 @@
 name: screen_record_plus
 description: "Native screen recording with coordinate-based capture for Android and iOS."
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/BrianTran24/screen_record
 homepage: https://pub.dev/publishers/brian98.com/packages
 
