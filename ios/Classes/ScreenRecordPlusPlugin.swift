@@ -15,6 +15,7 @@ public class ScreenRecordPlusPlugin: NSObject, FlutterPlugin, RPPreviewViewContr
     private var recordingY: CGFloat = 0
     private var recordingWidth: CGFloat = 0
     private var recordingHeight: CGFloat = 0
+    private var sessionStarted = false
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "screen_record_plus", binaryMessenger: registrar.messenger())
@@ -130,7 +131,8 @@ public class ScreenRecordPlusPlugin: NSObject, FlutterPlugin, RPPreviewViewContr
             }
             
             videoWriter?.startWriting()
-            videoWriter?.startSession(atSourceTime: .zero)
+            // Don't start session yet - wait for first sample buffer to get correct timestamp
+            sessionStarted = false
         } catch {
             print("Error setting up video writer: \(error.localizedDescription)")
         }
@@ -139,6 +141,13 @@ public class ScreenRecordPlusPlugin: NSObject, FlutterPlugin, RPPreviewViewContr
     private func appendSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
         guard let input = videoWriterInput, input.isReadyForMoreMediaData else {
             return
+        }
+        
+        // Start session with the first sample buffer's timestamp
+        if !sessionStarted {
+            let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            videoWriter?.startSession(atSourceTime: timestamp)
+            sessionStarted = true
         }
         
         input.append(sampleBuffer)
@@ -161,6 +170,7 @@ public class ScreenRecordPlusPlugin: NSObject, FlutterPlugin, RPPreviewViewContr
             self.videoWriterInput?.markAsFinished()
             self.videoWriter?.finishWriting {
                 self.isRecording = false
+                self.sessionStarted = false
                 
                 if let error = error {
                     result(FlutterError(code: "STOP_FAILED", message: error.localizedDescription, details: nil))
