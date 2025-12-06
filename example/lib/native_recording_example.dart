@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:screen_record_plus/screen_record_plus.dart';
 
+import 'video_playback_screen.dart';
+
 /// Example demonstrating native screen recording with coordinate-based capture
 class NativeRecordingExample extends StatefulWidget {
   const NativeRecordingExample({super.key});
@@ -130,33 +132,57 @@ class _NativeRecordingExampleState extends State<NativeRecordingExample> {
           ),
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Column(
               children: [
-                ElevatedButton.icon(
-                  onPressed: _isRecording ? null : _startRecording,
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Start'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _isRecording ? null : _startRecording,
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Start'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: !_isRecording ? null : _stopRecording,
+                      icon: const Icon(Icons.stop),
+                      label: const Text('Stop'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: _isRecording ? null : _exportVideo,
+                      icon: const Icon(Icons.download),
+                      label: const Text('Export'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                      ),
+                    ),
+                  ],
                 ),
-                ElevatedButton.icon(
-                  onPressed: !_isRecording ? null : _stopRecording,
-                  icon: const Icon(Icons.stop),
-                  label: const Text('Stop'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                if (_lastExportedFile != null) ...[
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => VideoPlaybackScreen(
+                            videoFile: _lastExportedFile!,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.play_circle_outline),
+                    label: const Text('Play Video'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                    ),
                   ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: _isRecording ? null : _exportVideo,
-                  icon: const Icon(Icons.download),
-                  label: const Text('Export'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                  ),
-                ),
+                ],
               ],
             ),
           ),
