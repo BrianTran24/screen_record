@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:screen_record_plus/screen_record_plus.dart';
 
+import 'video_playback_screen.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -247,6 +249,28 @@ class _MyHomePageState extends State<MyHomePage> {
                         Text(
                           exportedFile!.path.split('/').last,
                           style: const TextStyle(fontSize: 12),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VideoPlaybackScreen(
+                                  videoFile: exportedFile!,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.play_circle_outline),
+                          label: const Text('Play Video'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
                         ),
                       ],
                     ),
