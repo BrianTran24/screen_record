@@ -1,3 +1,11 @@
+## 1.0.1
+
+### Bug Fixes
+* **iOS**: Fixed video duration issue where recordings of a few seconds were exported as 35+ minute videos
+  * Root cause: AVAssetWriter was starting session at `.zero` timestamp, but ReplayKit sample buffers use system uptime timestamps
+  * Solution: Now starts the session using the timestamp from the first sample buffer for accurate duration calculation
+  * This fix only affects iOS; Android implementation was not affected
+
 ## 1.0.0 - BREAKING CHANGES
 
 **Major refactoring to native-only implementation**
