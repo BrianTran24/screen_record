@@ -135,17 +135,15 @@ class ScreenRecordPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         val metrics = DisplayMetrics()
         currentActivity.windowManager.defaultDisplay.getMetrics(metrics)
         
-        // If width/height are provided from Flutter, they're in logical pixels
-        // We need to convert them to physical pixels using density
         val density = metrics.density
         
         if (width != null || height != null) {
-            // Flutter dimensions are in logical pixels, convert to physical pixels
-            // If only one dimension is provided, use screen size for the other
+            // Convert provided dimensions from logical pixels (Flutter) to physical pixels
+            // The helper function uses screen dimensions as fallback for unprovided dimensions
             recordingWidth = toPhysicalPixels(width, density, metrics.widthPixels)
             recordingHeight = toPhysicalPixels(height, density, metrics.heightPixels)
         } else {
-            // Use full screen physical pixels
+            // No dimensions specified - use full screen physical pixels
             recordingWidth = metrics.widthPixels
             recordingHeight = metrics.heightPixels
         }

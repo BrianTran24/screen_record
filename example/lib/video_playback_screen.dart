@@ -17,6 +17,9 @@ class VideoPlaybackScreen extends StatefulWidget {
 }
 
 class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
+  // Tolerance for matching aspect ratios to common ratios (e.g., 16:9, 4:3)
+  static const double _aspectRatioTolerance = 0.01;
+  
   late VideoPlayerController _controller;
   bool _isInitialized = false;
   bool _hasError = false;
@@ -59,8 +62,6 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
   }
 
   String _formatAspectRatio(double aspectRatio) {
-    const double aspectRatioTolerance = 0.01;
-    
     // Try to find common aspect ratios
     const commonRatios = {
       16 / 9: '16:9',
@@ -73,7 +74,7 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
     
     // Check if it matches a common ratio (with small tolerance)
     for (final entry in commonRatios.entries) {
-      if ((entry.key - aspectRatio).abs() < aspectRatioTolerance) {
+      if ((entry.key - aspectRatio).abs() < _aspectRatioTolerance) {
         return entry.value;
       }
     }
