@@ -58,6 +58,28 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
     return '$minutes:$seconds';
   }
 
+  String _formatAspectRatio(double aspectRatio) {
+    // Try to find common aspect ratios
+    const commonRatios = {
+      16 / 9: '16:9',
+      4 / 3: '4:3',
+      21 / 9: '21:9',
+      1.0: '1:1',
+      3 / 2: '3:2',
+      2 / 1: '2:1',
+    };
+    
+    // Check if it matches a common ratio (with small tolerance)
+    for (final entry in commonRatios.entries) {
+      if ((entry.key - aspectRatio).abs() < 0.01) {
+        return entry.value;
+      }
+    }
+    
+    // For non-standard ratios, show as decimal
+    return '${aspectRatio.toStringAsFixed(2)}:1';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -205,7 +227,7 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
           const SizedBox(height: 4),
           if (_isInitialized)
             Text(
-              '${_controller.value.size.width.toInt()}x${_controller.value.size.height.toInt()} • ${_controller.value.aspectRatio.toStringAsFixed(2)}:1',
+              '${_controller.value.size.width.toInt()}x${_controller.value.size.height.toInt()} • ${_formatAspectRatio(_controller.value.aspectRatio)}',
               style: const TextStyle(color: Colors.white54, fontSize: 11),
               textAlign: TextAlign.center,
             ),
