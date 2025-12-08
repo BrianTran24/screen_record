@@ -59,6 +59,8 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
   }
 
   String _formatAspectRatio(double aspectRatio) {
+    const double aspectRatioTolerance = 0.01;
+    
     // Try to find common aspect ratios
     const commonRatios = {
       16 / 9: '16:9',
@@ -71,7 +73,7 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
     
     // Check if it matches a common ratio (with small tolerance)
     for (final entry in commonRatios.entries) {
-      if ((entry.key - aspectRatio).abs() < 0.01) {
+      if ((entry.key - aspectRatio).abs() < aspectRatioTolerance) {
         return entry.value;
       }
     }
