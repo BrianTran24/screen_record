@@ -228,6 +228,11 @@ class ScreenRecordPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     /**
      * Convert logical pixels (from Flutter) to physical pixels using density.
      * Returns the physical pixel value, or the fallback value if logicalPixels is null.
+     * 
+     * Note: The fallback values (metrics.widthPixels/heightPixels) are already in physical pixels,
+     * so no conversion is needed when logicalPixels is null. This ensures consistency:
+     * - Provided dimensions: converted from logical to physical pixels
+     * - Null dimensions: use screen dimensions (already physical pixels)
      */
     private fun toPhysicalPixels(logicalPixels: Int?, density: Float, fallback: Int): Int {
         return logicalPixels?.let { (it * density).toInt() } ?: fallback

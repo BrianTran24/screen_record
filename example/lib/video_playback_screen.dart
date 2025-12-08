@@ -20,6 +20,16 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
   // Tolerance for matching aspect ratios to common ratios (e.g., 16:9, 4:3)
   static const double _aspectRatioTolerance = 0.01;
   
+  // Common aspect ratios for smart display formatting
+  static const Map<double, String> _commonRatios = {
+    16 / 9: '16:9',
+    4 / 3: '4:3',
+    21 / 9: '21:9',
+    1.0: '1:1',
+    3 / 2: '3:2',
+    2 / 1: '2:1',
+  };
+  
   late VideoPlayerController _controller;
   bool _isInitialized = false;
   bool _hasError = false;
@@ -62,18 +72,8 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
   }
 
   String _formatAspectRatio(double aspectRatio) {
-    // Try to find common aspect ratios
-    const commonRatios = {
-      16 / 9: '16:9',
-      4 / 3: '4:3',
-      21 / 9: '21:9',
-      1.0: '1:1',
-      3 / 2: '3:2',
-      2 / 1: '2:1',
-    };
-    
     // Check if it matches a common ratio (with small tolerance)
-    for (final entry in commonRatios.entries) {
+    for (final entry in _commonRatios.entries) {
       if ((entry.key - aspectRatio).abs() < _aspectRatioTolerance) {
         return entry.value;
       }
