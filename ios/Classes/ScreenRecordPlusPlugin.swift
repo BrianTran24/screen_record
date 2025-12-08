@@ -17,6 +17,11 @@ public class ScreenRecordPlusPlugin: NSObject, FlutterPlugin, RPPreviewViewContr
     private var recordingHeight: CGFloat = 0
     private var sessionStarted = false
     
+    // Cache screen scale for performance
+    private lazy var screenScale: CGFloat = {
+        return UIScreen.main.scale
+    }()
+    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "screen_record_plus", binaryMessenger: registrar.messenger())
         let instance = ScreenRecordPlusPlugin()
@@ -78,8 +83,14 @@ public class ScreenRecordPlusPlugin: NSObject, FlutterPlugin, RPPreviewViewContr
         recordingY = CGFloat(y)
         
         let screenSize = UIScreen.main.bounds.size
-        recordingWidth = CGFloat(width ?? Double(screenSize.width))
-        recordingHeight = CGFloat(height ?? Double(screenSize.height))
+        
+        // Convert from logical pixels (Flutter) to physical pixels (native)
+        // Flutter passes dimensions in logical pixels, but video encoding needs physical pixels
+        let logicalWidth = CGFloat(width ?? Double(screenSize.width))
+        let logicalHeight = CGFloat(height ?? Double(screenSize.height))
+        
+        recordingWidth = logicalWidth * screenScale
+        recordingHeight = logicalHeight * screenScale
         
         // Setup video writer
         setupVideoWriter()

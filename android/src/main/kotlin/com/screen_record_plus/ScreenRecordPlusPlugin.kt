@@ -134,8 +134,19 @@ class ScreenRecordPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         
         val metrics = DisplayMetrics()
         currentActivity.windowManager.defaultDisplay.getMetrics(metrics)
-        recordingWidth = width ?: metrics.widthPixels
-        recordingHeight = height ?: metrics.heightPixels
+        
+        val density = metrics.density
+        
+        if (width != null || height != null) {
+            // Convert provided dimensions from logical pixels (Flutter) to physical pixels
+            // The helper function uses screen dimensions as fallback for unprovided dimensions
+            recordingWidth = toPhysicalPixels(width, density, metrics.widthPixels)
+            recordingHeight = toPhysicalPixels(height, density, metrics.heightPixels)
+        } else {
+            // No dimensions specified - use full screen physical pixels
+            recordingWidth = metrics.widthPixels
+            recordingHeight = metrics.heightPixels
+        }
         
         pendingResult = result
         
@@ -212,6 +223,19 @@ class ScreenRecordPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             null,
             null
         )
+    }
+    
+    /**
+     * Convert logical pixels (from Flutter) to physical pixels using density.
+     * Returns the physical pixel value, or the fallback value if logicalPixels is null.
+     * 
+     * Note: The fallback values (metrics.widthPixels/heightPixels) are already in physical pixels,
+     * so no conversion is needed when logicalPixels is null. This ensures consistency:
+     * - Provided dimensions: converted from logical to physical pixels
+     * - Null dimensions: use screen dimensions (already physical pixels)
+     */
+    private fun toPhysicalPixels(logicalPixels: Int?, density: Float, fallback: Int): Int {
+        return logicalPixels?.let { (it * density).toInt() } ?: fallback
     }
     
     private fun stopRecording(result: Result) {

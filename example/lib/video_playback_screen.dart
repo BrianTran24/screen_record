@@ -17,6 +17,19 @@ class VideoPlaybackScreen extends StatefulWidget {
 }
 
 class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
+  // Tolerance for matching aspect ratios to common ratios (e.g., 16:9, 4:3)
+  static const double _aspectRatioTolerance = 0.01;
+  
+  // Common aspect ratios for smart display formatting
+  static const Map<double, String> _commonRatios = {
+    16 / 9: '16:9',
+    4 / 3: '4:3',
+    21 / 9: '21:9',
+    1.0: '1:1',
+    3 / 2: '3:2',
+    2 / 1: '2:1',
+  };
+  
   late VideoPlayerController _controller;
   bool _isInitialized = false;
   bool _hasError = false;
@@ -56,6 +69,18 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return '$minutes:$seconds';
+  }
+
+  String _formatAspectRatio(double aspectRatio) {
+    // Check if it matches a common ratio (with small tolerance)
+    for (final entry in _commonRatios.entries) {
+      if ((entry.key - aspectRatio).abs() < _aspectRatioTolerance) {
+        return entry.value;
+      }
+    }
+    
+    // For non-standard ratios, show as decimal
+    return '${aspectRatio.toStringAsFixed(2)}:1';
   }
 
   @override
@@ -202,6 +227,13 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
             style: const TextStyle(color: Colors.white70, fontSize: 12),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 4),
+          if (_isInitialized)
+            Text(
+              '${_controller.value.size.width.toInt()}x${_controller.value.size.height.toInt()} • ${_formatAspectRatio(_controller.value.aspectRatio)}',
+              style: const TextStyle(color: Colors.white54, fontSize: 11),
+              textAlign: TextAlign.center,
+            ),
         ],
       ),
     );
