@@ -77,9 +77,17 @@ public class ScreenRecordPlusPlugin: NSObject, FlutterPlugin, RPPreviewViewContr
         recordingX = CGFloat(x)
         recordingY = CGFloat(y)
         
+        // Get screen scale to convert logical pixels to physical pixels
+        let screenScale = UIScreen.main.scale
         let screenSize = UIScreen.main.bounds.size
-        recordingWidth = CGFloat(width ?? Double(screenSize.width))
-        recordingHeight = CGFloat(height ?? Double(screenSize.height))
+        
+        // Convert from logical pixels (Flutter) to physical pixels (native)
+        // Flutter passes dimensions in logical pixels, but video encoding needs physical pixels
+        let logicalWidth = CGFloat(width ?? Double(screenSize.width))
+        let logicalHeight = CGFloat(height ?? Double(screenSize.height))
+        
+        recordingWidth = logicalWidth * screenScale
+        recordingHeight = logicalHeight * screenScale
         
         // Setup video writer
         setupVideoWriter()

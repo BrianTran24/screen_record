@@ -202,6 +202,13 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
             style: const TextStyle(color: Colors.white70, fontSize: 12),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 4),
+          if (_isInitialized)
+            Text(
+              '${_controller.value.size.width.toInt()}x${_controller.value.size.height.toInt()} • ${_controller.value.aspectRatio.toStringAsFixed(2)}:1',
+              style: const TextStyle(color: Colors.white54, fontSize: 11),
+              textAlign: TextAlign.center,
+            ),
         ],
       ),
     );
