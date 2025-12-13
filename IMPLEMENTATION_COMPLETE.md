@@ -41,22 +41,30 @@ recordingHeight = toPhysicalPixels(height, density, metrics.heightPixels)
 ```
 
 ### UI Enhancement (`example/lib/video_playback_screen.dart`)
+- **Black letterboxing**: Added black background container to clearly show aspect ratio maintenance
 - Display video resolution and aspect ratio in playback screen
 - Smart formatting: shows common ratios (16:9, 4:3, 1:1) when detected
 - Falls back to decimal format for non-standard ratios
 - Optimized with static constants for performance
 
 ```dart
-static const double _aspectRatioTolerance = 0.01;
-static const Map<double, String> _commonRatios = {
-  16 / 9: '16:9',
-  4 / 3: '4:3',
-  1.0: '1:1',
-  // ... more ratios
-};
+Container(
+  color: Colors.black,  // Black letterboxing for proper aspect ratio display
+  child: Center(
+    child: AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: VideoPlayer(_controller),
+    ),
+  ),
+)
 ```
 
 Display example: "1200x1200 • 1:1"
+
+### Example Screen Enhancement
+- Shows device pixel ratio information (e.g., "Device pixel ratio: 3.0x")
+- Displays expected video dimensions before recording
+- Helps users understand logical vs physical pixel conversion
 
 ### Documentation (`VIDEO_RATIO_FIX.md`)
 - Comprehensive explanation of the problem and solution
