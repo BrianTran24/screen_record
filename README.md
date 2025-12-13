@@ -68,6 +68,32 @@ await controller.stop();
 final file = await controller.exporter.exportVideo();
 ```
 
+### Recording a Specific Widget
+
+Easily record a specific widget using GlobalKey:
+
+```dart
+// Create a GlobalKey and attach it to your widget
+final key = GlobalKey();
+
+Widget build(BuildContext context) {
+  return Container(
+    key: key,
+    child: YourWidget(),
+  );
+}
+
+// Get the widget's position and size
+final rect = ScreenRecorderController.getWidgetRect(key);
+if (rect != null) {
+  final controller = ScreenRecorderController(recordingRect: rect);
+  await controller.start();
+  // ... recording ...
+  await controller.stop();
+  final file = await controller.exporter.exportVideo();
+}
+```
+
 ### Check Platform Support
 
 ```dart

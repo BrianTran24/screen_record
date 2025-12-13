@@ -16,6 +16,29 @@ class ScreenRecorderController {
   /// If null, records the entire screen
   final Rect? recordingRect;
 
+  /// Get the screen position and size of a widget using its GlobalKey
+  /// 
+  /// Returns null if the widget is not currently mounted or visible
+  /// 
+  /// Example:
+  /// ```dart
+  /// final key = GlobalKey();
+  /// // ... widget with key ...
+  /// final rect = ScreenRecorderController.getWidgetRect(key);
+  /// if (rect != null) {
+  ///   final controller = ScreenRecorderController(recordingRect: rect);
+  /// }
+  /// ```
+  static Rect? getWidgetRect(GlobalKey key) {
+    final renderObject = key.currentContext?.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      final offset = renderObject.localToGlobal(Offset.zero);
+      final size = renderObject.size;
+      return Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+    }
+    return null;
+  }
+
   bool _record = false;
 
   DateTime? startTime;

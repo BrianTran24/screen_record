@@ -1,3 +1,13 @@
+## 1.0.2
+
+### Features
+* **Widget-based Recording**: Added `ScreenRecorderController.getWidgetRect()` helper method to easily record specific widgets
+  * Use `GlobalKey` to get widget position and size on screen
+  * Automatically converts widget boundaries to recording coordinates
+  * See new `WidgetRecordingExample` in example app
+* **Documentation**: Updated README and API documentation with widget recording examples
+* **Example**: Added new widget recording example demonstrating how to capture specific UI components
+
 ## 1.0.1
 
 ### Bug Fixes

@@ -33,6 +33,27 @@ ScreenRecorderController({
 
 ### Methods
 
+#### getWidgetRect() (static)
+```dart
+static Rect? getWidgetRect(GlobalKey key)
+```
+Get the screen position and size of a widget using its GlobalKey.
+
+**Parameters:**
+- `key` (GlobalKey): The GlobalKey attached to the widget
+
+**Returns:** Rect? - The widget's position and size, or null if not mounted/visible
+
+**Example:**
+```dart
+final key = GlobalKey();
+// ... attach key to widget ...
+final rect = ScreenRecorderController.getWidgetRect(key);
+if (rect != null) {
+  final controller = ScreenRecorderController(recordingRect: rect);
+}
+```
+
 #### start()
 ```dart
 Future<void> start()
