@@ -80,12 +80,27 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               if (isNativeSupported) ...[
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Recording a 400x400 region starting at (100, 100)',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                    textAlign: TextAlign.center,
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Recording a 400x400 region starting at (100, 100)',
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Device pixel ratio: ${MediaQuery.of(context).devicePixelRatio.toStringAsFixed(1)}x',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'Video will be: ${(400 * MediaQuery.of(context).devicePixelRatio).toInt()}x${(400 * MediaQuery.of(context).devicePixelRatio).toInt()} pixels',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),

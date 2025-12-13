@@ -103,10 +103,26 @@ class _NativeRecordingExampleState extends State<NativeRecordingExample> {
                       border: Border.all(color: Colors.blue, width: 2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
-                      'Recording Region\n400x400 pixels\nStarting at (50, 100)',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Recording Region\n400x400 logical pixels\nStarting at (50, 100)',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Device pixel ratio: ${MediaQuery.of(context).devicePixelRatio.toStringAsFixed(1)}x',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        Text(
+                          'Actual video: ${(400 * MediaQuery.of(context).devicePixelRatio).toInt()}x${(400 * MediaQuery.of(context).devicePixelRatio).toInt()} px',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 20),
