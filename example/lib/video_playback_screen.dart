@@ -136,10 +136,13 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
                 : Column(
                     children: [
                       Expanded(
-                        child: Center(
-                          child: AspectRatio(
-                            aspectRatio: _controller.value.aspectRatio,
-                            child: VideoPlayer(_controller),
+                        child: Container(
+                          color: Colors.black,
+                          child: Center(
+                            child: AspectRatio(
+                              aspectRatio: _controller.value.aspectRatio,
+                              child: VideoPlayer(_controller),
+                            ),
                           ),
                         ),
                       ),

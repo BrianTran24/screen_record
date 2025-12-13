@@ -83,18 +83,37 @@ if (width != null && height != null) {
 Enhanced `video_playback_screen.dart` to display video information:
 
 ```dart
+Container(
+  color: Colors.black,
+  child: Center(
+    child: AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: VideoPlayer(_controller),
+    ),
+  ),
+)
+```
+
+Display video information:
+```dart
 Text(
-  '${_controller.value.size.width.toInt()}x${_controller.value.size.height.toInt()} • ${_controller.value.aspectRatio.toStringAsFixed(2)}:1',
+  '${_controller.value.size.width.toInt()}x${_controller.value.size.height.toInt()} • ${_formatAspectRatio(_controller.value.aspectRatio)}',
   style: const TextStyle(color: Colors.white54, fontSize: 11),
   textAlign: TextAlign.center,
 )
 ```
 
-This displays:
-- Video resolution (e.g., "1200x1200")
-- Aspect ratio (e.g., "1.00:1")
+This provides:
+- **Black letterboxing**: Clear visual indication when video maintains its aspect ratio
+- **Video resolution**: Display actual encoded dimensions (e.g., "1200x1200")
+- **Smart aspect ratio**: Shows common ratios like "16:9", "4:3", "1:1" or decimal format
 
-Users can now verify the video has the correct dimensions.
+Enhanced example screens to show device pixel ratio and expected video dimensions:
+- Displays current device pixel ratio (e.g., "3.0x")
+- Calculates and shows final video dimensions before recording
+- Helps users understand the relationship between logical and physical pixels
+
+Users can now verify the video has the correct dimensions and see proper letterboxing.
 
 ## Impact
 

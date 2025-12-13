@@ -96,18 +96,40 @@ class _NativeRecordingExampleState extends State<NativeRecordingExample> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    margin: const EdgeInsets.all(20),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blue, width: 2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'Recording Region\n400x400 pixels\nStarting at (50, 100)',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16),
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+                      final videoDimension = (400 * pixelRatio).toInt();
+                      return Container(
+                        margin: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.blue, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Recording Region\n400x400 logical pixels\nStarting at (50, 100)',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Device pixel ratio: ${pixelRatio.toStringAsFixed(1)}x',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                            Text(
+                              'Actual video: ${videoDimension}x$videoDimension px',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   if (_isRecording)
