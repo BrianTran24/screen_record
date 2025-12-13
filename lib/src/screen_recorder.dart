@@ -18,7 +18,7 @@ class ScreenRecorderController {
 
   /// Get the screen position and size of a widget using its GlobalKey
   /// 
-  /// Returns null if the widget is not currently mounted or visible
+  /// Returns null if the widget is not currently mounted in the widget tree
   /// 
   /// Example:
   /// ```dart
