@@ -113,6 +113,9 @@ class Exporter {
     }
   }
   
+  // Maximum video dimensions (8K resolution)
+  static const int _maxVideoDimension = 7680;
+  
   /// Crop video using FFmpeg
   Future<File?> _cropVideo(
     File inputFile,
@@ -121,19 +124,15 @@ class Exporter {
     ValueChanged<ExportResult>? onProgress,
   ) async {
     try {
-      onProgress?.call(ExportResult(status: ExportStatus.cropping, percent: 0.7));
+      onProgress?.call(ExportResult(status: ExportStatus.cropping, percent: 0.65));
       
       // Validate and build FFmpeg crop filter parameters
-      // Ensure dimensions are positive and reasonable
-      final cropWidth = cropRect.width.toInt().clamp(1, 7680); // Max 8K width
-      final cropHeight = cropRect.height.toInt().clamp(1, 4320); // Max 8K height
-      final cropX = cropRect.left.toInt().clamp(0, 7680);
-      final cropY = cropRect.top.toInt().clamp(0, 4320);
-      
-      if (cropWidth <= 0 || cropHeight <= 0) {
-        debugPrint('Invalid crop dimensions: ${cropWidth}x$cropHeight');
-        return null;
-      }
+      // Ensure dimensions are positive and within reasonable bounds (8K max)
+      // Note: We don't clamp coordinates since FFmpeg will handle invalid crops gracefully
+      final cropWidth = cropRect.width.toInt().clamp(1, _maxVideoDimension);
+      final cropHeight = cropRect.height.toInt().clamp(1, _maxVideoDimension);
+      final cropX = cropRect.left.toInt().clamp(0, _maxVideoDimension);
+      final cropY = cropRect.top.toInt().clamp(0, _maxVideoDimension);
       
       // FFmpeg crop filter: crop=width:height:x:y
       final cropFilter = 'crop=$cropWidth:$cropHeight:$cropX:$cropY';
@@ -148,20 +147,19 @@ class Exporter {
         outputPath,
       ];
       
-      debugPrint('FFmpeg crop filter: $cropFilter');
+      debugPrint('FFmpeg crop: ${cropWidth}x$cropHeight at ($cropX,$cropY)');
       
       final session = await FFmpegKit.executeWithArguments(arguments);
       final returnCode = await session.getReturnCode();
       
       if (ReturnCode.isSuccess(returnCode)) {
-        onProgress?.call(ExportResult(status: ExportStatus.encoded, percent: 0.9));
+        onProgress?.call(ExportResult(status: ExportStatus.encoded, percent: 0.85));
         final outputFile = File(outputPath);
         if (outputFile.existsSync()) {
           return outputFile;
         }
       } else {
-        final output = await session.getOutput();
-        debugPrint('FFmpeg failed with output: $output');
+        debugPrint('FFmpeg cropping failed');
       }
       
       return null;
