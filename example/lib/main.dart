@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:screen_record_plus/screen_record_plus.dart';
 
 import 'video_playback_screen.dart';
+import 'widget_recording_example.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,12 +81,36 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               if (isNativeSupported) ...[
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Recording a 400x400 region starting at (100, 100)',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                    textAlign: TextAlign.center,
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Recording a 400x400 region starting at (100, 100)',
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const WidgetRecordingExample(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.widgets),
+                        label: const Text('Widget Recording Example'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),

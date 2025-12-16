@@ -137,9 +137,13 @@ class _VideoPlaybackScreenState extends State<VideoPlaybackScreen> {
                     children: [
                       Expanded(
                         child: Center(
-                          child: AspectRatio(
-                            aspectRatio: _controller.value.aspectRatio,
-                            child: VideoPlayer(_controller),
+                          child: Container(
+                            padding: EdgeInsets.all(16),
+                            color: Colors.red,
+                            child: AspectRatio(
+                              aspectRatio: _controller.value.aspectRatio,
+                              child: VideoPlayer(_controller),
+                            ),
                           ),
                         ),
                       ),

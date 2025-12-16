@@ -1,6 +1,6 @@
 name: screen_record_plus
 description: "Native screen recording with coordinate-based capture for Android and iOS."
-version: 1.0.1
+version: 1.1.0
 repository: https://github.com/BrianTran24/screen_record
 homepage: https://pub.dev/publishers/brian98.com/packages
 
@@ -13,7 +13,11 @@ dependencies:
     sdk: flutter
   path_provider: ^2.0.2
   path: ^1.9.0
-
+  ffmpeg_kit_flutter:
+   git:
+      url: https://github.com/Sahad2701/ffmpeg-kit.git
+      ref: flutter_fix_retired_v6.0.3
+      path: flutter/flutter
 
 dev_dependencies:
   flutter_test:

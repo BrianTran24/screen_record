@@ -23,6 +23,32 @@ void main() {
       final controller = ScreenRecorderController();
       expect(() => controller.duration, throwsException);
     });
+
+    testWidgets('getWidgetRect returns null for unmounted widget', (tester) async {
+      final key = GlobalKey();
+      final rect = ScreenRecorderController.getWidgetRect(key);
+      expect(rect, isNull);
+    });
+
+    testWidgets('getWidgetRect returns correct rect for mounted widget', (tester) async {
+      final key = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              key: key,
+              width: 200,
+              height: 200,
+            ),
+          ),
+        ),
+      );
+
+      final rect = ScreenRecorderController.getWidgetRect(key);
+      expect(rect, isNotNull);
+      expect(rect!.width, 200);
+      expect(rect.height, 200);
+    });
   });
 
   group('NativeScreenRecorder', () {
@@ -90,8 +116,9 @@ void main() {
     });
 
     test('export status enum has all values', () {
-      expect(ExportStatus.values.length, 5);
+      expect(ExportStatus.values.length, 6);
       expect(ExportStatus.values.contains(ExportStatus.exporting), isTrue);
+      expect(ExportStatus.values.contains(ExportStatus.cropping), isTrue);
       expect(ExportStatus.values.contains(ExportStatus.encoding), isTrue);
       expect(ExportStatus.values.contains(ExportStatus.encoded), isTrue);
       expect(ExportStatus.values.contains(ExportStatus.exported), isTrue);

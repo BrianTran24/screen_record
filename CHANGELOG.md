@@ -1,3 +1,32 @@
+## 1.1.0
+
+### Features
+* **Video Cropping**: Implemented FFmpeg-based video cropping for region-specific recording
+  * Re-added `ffmpeg_kit_flutter` dependency for post-processing
+  * Videos are now automatically cropped to `recordingRect` after recording
+  * Full screen is recorded, then cropped to specified region during export
+* **Widget-based Recording**: Added `ScreenRecorderController.getWidgetRect()` helper method to easily record specific widgets
+  * Use `GlobalKey` to get widget position and size on screen
+  * Automatically converts widget boundaries to recording coordinates
+  * See new `WidgetRecordingExample` in example app
+* **Documentation**: Updated README and API documentation with widget recording examples
+* **Example**: Added new widget recording example demonstrating how to capture specific UI components
+
+### Technical Details
+* Recording workflow: Record full screen → Export → Crop to region (if specified) → Return cropped video
+* FFmpeg is used only for post-processing (cropping), not for recording
+* Package size will increase due to FFmpeg dependency (~100MB)
+
+## 1.0.2
+
+### Features
+* **Widget-based Recording**: Added `ScreenRecorderController.getWidgetRect()` helper method to easily record specific widgets
+  * Use `GlobalKey` to get widget position and size on screen
+  * Automatically converts widget boundaries to recording coordinates
+  * See new `WidgetRecordingExample` in example app
+* **Documentation**: Updated README and API documentation with widget recording examples
+* **Example**: Added new widget recording example demonstrating how to capture specific UI components
+
 ## 1.0.1
 
 ### Bug Fixes
