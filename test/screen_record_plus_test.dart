@@ -116,8 +116,9 @@ void main() {
     });
 
     test('export status enum has all values', () {
-      expect(ExportStatus.values.length, 5);
+      expect(ExportStatus.values.length, 6);
       expect(ExportStatus.values.contains(ExportStatus.exporting), isTrue);
+      expect(ExportStatus.values.contains(ExportStatus.cropping), isTrue);
       expect(ExportStatus.values.contains(ExportStatus.encoding), isTrue);
       expect(ExportStatus.values.contains(ExportStatus.encoded), isTrue);
       expect(ExportStatus.values.contains(ExportStatus.exported), isTrue);

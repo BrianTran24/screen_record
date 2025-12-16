@@ -68,7 +68,7 @@ class Exporter {
       
       if (recordingRect != null) {
         // Crop the video using FFmpeg
-        onProgress?.call(ExportResult(status: ExportStatus.encoding, percent: 0.6));
+        onProgress?.call(ExportResult(status: ExportStatus.cropping, percent: 0.6));
         
         final finalOutputPath = join(cacheFolderDir.path, '$outputName.mp4');
         final croppedFile = await _cropVideo(
@@ -121,15 +121,40 @@ class Exporter {
     ValueChanged<ExportResult>? onProgress,
   ) async {
     try {
+      onProgress?.call(ExportResult(status: ExportStatus.cropping, percent: 0.7));
+      
+      // Validate and build FFmpeg crop filter parameters
+      // Ensure dimensions are positive and reasonable
+      final cropWidth = cropRect.width.toInt().clamp(1, 7680); // Max 8K width
+      final cropHeight = cropRect.height.toInt().clamp(1, 4320); // Max 8K height
+      final cropX = cropRect.left.toInt().clamp(0, 7680);
+      final cropY = cropRect.top.toInt().clamp(0, 4320);
+      
+      if (cropWidth <= 0 || cropHeight <= 0) {
+        debugPrint('Invalid crop dimensions: ${cropWidth}x$cropHeight');
+        return null;
+      }
+      
       // FFmpeg crop filter: crop=width:height:x:y
-      final command = '-i "${inputFile.path}" -filter:v "crop=${cropRect.width.toInt()}:${cropRect.height.toInt()}:${cropRect.left.toInt()}:${cropRect.top.toInt()}" -c:a copy "$outputPath"';
+      final cropFilter = 'crop=$cropWidth:$cropHeight:$cropX:$cropY';
       
-      debugPrint('FFmpeg command: $command');
+      // Use executeWithArguments for better security (prevents command injection)
+      // -y flag overwrites output file if it exists
+      final arguments = [
+        '-i', inputFile.path,
+        '-filter:v', cropFilter,
+        '-c:a', 'copy',
+        '-y', // Overwrite output file without asking
+        outputPath,
+      ];
       
-      final session = await FFmpegKit.execute(command);
+      debugPrint('FFmpeg crop filter: $cropFilter');
+      
+      final session = await FFmpegKit.executeWithArguments(arguments);
       final returnCode = await session.getReturnCode();
       
       if (ReturnCode.isSuccess(returnCode)) {
+        onProgress?.call(ExportResult(status: ExportStatus.encoded, percent: 0.9));
         final outputFile = File(outputPath);
         if (outputFile.existsSync()) {
           return outputFile;
@@ -149,6 +174,7 @@ class Exporter {
 
 enum ExportStatus {
   exporting,
+  cropping,
   encoding,
   encoded,
   exported,

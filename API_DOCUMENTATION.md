@@ -265,6 +265,7 @@ Status of export operation.
 ```dart
 enum ExportStatus {
   exporting,  // Export in progress
+  cropping,   // Cropping video (FFmpeg)
   encoding,   // Encoding video
   encoded,    // Encoding complete
   exported,   // Export complete
