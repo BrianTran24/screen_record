@@ -303,8 +303,18 @@ class _WidgetRecordingExampleState extends State<WidgetRecordingExample> {
                             '1. Attach a GlobalKey to the widget you want to record\n'
                             '2. Use ScreenRecorderController.getWidgetRect(key) to get the widget\'s position\n'
                             '3. Create a controller with the recordingRect parameter\n'
-                            '4. Start recording - only the widget area will be captured',
+                            '4. Start recording - full screen is recorded\n'
+                            '5. Stop and export - video is automatically cropped to widget area using FFmpeg',
                             style: TextStyle(fontSize: 14, height: 1.5),
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            '✨ The exported video will contain ONLY the widget area!',
+                            style: TextStyle(
+                              fontSize: 14, 
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
                           ),
                         ],
                       ),

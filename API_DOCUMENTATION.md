@@ -228,14 +228,20 @@ Future<File?> exportVideo({
   String cacheFolder = "ScreenRecordVideos",
 })
 ```
-Exports the recorded content as a video file.
+Exports the recorded content as a video file. If a `recordingRect` was specified in the controller, the video will be automatically cropped to that region using FFmpeg.
 
 **Parameters:**
 - `onProgress` (ValueChanged<ExportResult>?): Progress callback
 - `multiCache` (bool): Create unique filename for each export. Default: false
 - `cacheFolder` (String): Folder for cached videos. Default: "ScreenRecordVideos"
 
-**Returns:** Future<File?> - Exported video file or null if failed
+**Returns:** Future<File?> - Exported (and optionally cropped) video file or null if failed
+
+**Export Process:**
+1. Export full screen recording to temporary location
+2. If `recordingRect` is set, crop video using FFmpeg
+3. Save final video to cache folder
+4. Delete temporary files
 
 **Example:**
 ```dart
@@ -372,6 +378,13 @@ class _RecordingExampleState extends State<RecordingExample> {
 - Works on iOS 11.0 and later
 - Uses ReplayKit (RPScreenRecorder)
 - Output: MP4 with H.264 encoding
+
+### Video Cropping (v1.1.0+)
+- FFmpeg is used for post-recording video cropping
+- Cropping happens automatically during export when `recordingRect` is specified
+- Full screen is recorded, then cropped to specified region
+- Package size increases by ~100MB due to FFmpeg inclusion
+- No quality loss during cropping (uses stream copy for audio)
 
 ## Best Practices
 
