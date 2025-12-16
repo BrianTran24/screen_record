@@ -1,11 +1,12 @@
 # Screen Record Plus
 
-Native screen recording library for Flutter using platform-specific APIs (Android MediaProjection and iOS ReplayKit) with coordinate-based region capture.
+Native screen recording library for Flutter using platform-specific APIs (Android MediaProjection and iOS ReplayKit) with FFmpeg-powered region cropping.
 
 ## Features
 
 - ✅ Native screen recording (Android & iOS)
-- ✅ Coordinate-based recording (capture specific screen regions)
+- ✅ Region-specific recording with automatic video cropping
+- ✅ Widget-based recording using GlobalKey
 - ✅ Video export with customizable settings
 - ✅ High-quality MP4 output with H.264 encoding
 
@@ -54,7 +55,7 @@ print('Video saved to: ${file?.path}');
 
 ### Recording with Coordinates
 
-Capture a specific region of the screen:
+Capture a specific region of the screen. The full screen is recorded, then the video is automatically cropped to the specified region during export:
 
 ```dart
 // Record a 400x400 region starting at position (100, 100)
@@ -65,8 +66,10 @@ final controller = ScreenRecorderController(
 await controller.start();
 // ... recording ...
 await controller.stop();
-final file = await controller.exporter.exportVideo();
+final file = await controller.exporter.exportVideo(); // Automatically cropped
 ```
+
+**How it works**: The native APIs record the full screen, then FFmpeg crops the video to your specified region during export. This ensures you only get the part of the screen you want.
 
 ### Recording a Specific Widget
 
@@ -188,6 +191,12 @@ See the [example](example) folder for a complete working example.
 
 ## Technical Details
 
+### Recording Process
+1. **Capture**: Native APIs (MediaProjection/ReplayKit) record the full screen
+2. **Export**: Video is exported to temporary location
+3. **Crop**: If `recordingRect` is specified, FFmpeg crops the video to that region
+4. **Output**: Final cropped video is saved to cache folder
+
 ### Android Implementation
 - Uses **MediaProjection API** for screen capture
 - **MediaRecorder** for video encoding
@@ -200,9 +209,15 @@ See the [example](example) folder for a complete working example.
 - H.264 codec with configurable quality
 - Outputs MP4 format
 
+### Video Cropping
+- Uses **FFmpeg** for post-recording video cropping
+- Cropping happens automatically during export when `recordingRect` is specified
+- No quality loss during cropping (uses stream copy for audio)
+- Note: Package size increases by ~100MB due to FFmpeg inclusion
+
 ## Migration from v0.x
 
-Version 1.0.0 removes the widget-based recording mode and FFmpeg dependency. If you were using:
+Version 1.0.0 removed widget-based recording mode. Version 1.1.0 re-adds FFmpeg for video cropping functionality. If you were using:
 
 **Before (v0.x):**
 ```dart
