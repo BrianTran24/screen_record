@@ -36,27 +36,28 @@ class _WidgetRecordingExampleState extends State<WidgetRecordingExample> {
 
   void _setupRecording() {
     // Get the widget's position and size on screen
-    final rect = ScreenRecorderController.getWidgetRect(_widgetKey);
+    // final rect = ScreenRecorderController.getWidgetRect(_widgetKey);
     
-    if (rect == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not get widget position. Please try again.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
+    // if (rect == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text('Could not get widget position. Please try again.'),
+    //       duration: Duration(seconds: 2),
+    //     ),
+    //   );
+    //   return;
+    // }
 
     setState(() {
-      _widgetRect = rect;
-      _controller = ScreenRecorderController(recordingRect: rect);
+      // _widgetRect = rect;
+      _controller = ScreenRecorderController(recordingRect: Rect.fromLTRB(0, 0, 500, 1000));
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Recording area set: ${rect.width.toInt()}x${rect.height.toInt()} at (${rect.left.toInt()}, ${rect.top.toInt()})',
+          '',
+          // 'Recording area set: ${rect.width.toInt()}x${rect.height.toInt()} at (${rect.left.toInt()}, ${rect.top.toInt()})',
         ),
         duration: const Duration(seconds: 2),
       ),

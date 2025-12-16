@@ -124,6 +124,7 @@ class Exporter {
     ValueChanged<ExportResult>? onProgress,
   ) async {
     try {
+      print('cropRect: $cropRect');
       onProgress?.call(ExportResult(status: ExportStatus.cropping, percent: 0.65));
       
       // Validate and build FFmpeg crop filter parameters
