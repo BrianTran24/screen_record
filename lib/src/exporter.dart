@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Rect;
+import 'package:flutter_ffmpeg_kit_full/ffmpeg_kit.dart';
+import 'package:flutter_ffmpeg_kit_full/return_code.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/return_code.dart';
 
 import '../screen_record_plus.dart';
 import 'native_screen_recorder.dart';

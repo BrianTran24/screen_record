@@ -13,11 +13,11 @@ dependencies:
     sdk: flutter
   path_provider: ^2.0.2
   path: ^1.9.0
-  ffmpeg_kit_flutter:
-   git:
-      url: https://github.com/Sahad2701/ffmpeg-kit.git
-      ref: flutter_fix_retired_v6.0.3
-      path: flutter/flutter
+  flutter_ffmpeg_kit_full:
+#   git:
+#      url: https://github.com/Sahad2701/ffmpeg-kit.git
+#      ref: flutter_fix_retired_v6.0.3
+#      path: flutter/flutter
 
 dev_dependencies:
   flutter_test:
